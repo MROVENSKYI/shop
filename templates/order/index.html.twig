@@ -1,0 +1,23 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Order History{% endblock %}
+
+{% block body %}
+    <div class="container mt-4">
+        <h1>Order History</h1>
+        {% if orders | length > 0 and orders[0].sum > 0 %}
+            <ul class="list-group mt-4">
+                {% for order in orders %}
+                    <li class="list-group-item">
+                        Order #{{ order.id }} - Total: {{ order.sum }}
+                        <a href="{{ path('order_show', { orderId: order.id }) }}" class="btn btn-primary float-right">Details</a>
+                    </li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <div class="alert alert-info">
+                You have no orders. Start shopping <a href="{{ path('app_shop') }}">here</a>.
+            </div>
+        {% endif %}
+    </div>
+{% endblock %}

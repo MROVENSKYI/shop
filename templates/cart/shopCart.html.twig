@@ -1,0 +1,37 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Cart{% endblock %}
+
+{% block body %}
+    <div class="container mt-4">
+        <h1>Your Cart</h1>
+        {% if cartItems | length > 0 %}
+            <div class="row mt-4">
+                <div class="col-md-8">
+                    {% for item in cartItems %}
+                        <div class="mb-3">
+                            <h2>{{ item.getProduct.name }}</h2>
+                            <p>Price: {{ item.getPrice }} x {{ item.getQuantity }}</p>
+                            <p>Subtotal: {{ item.getPrice * item.getQuantity }}</p>
+                            <div>
+                                <a href="{{ path('cart_remove', {'orderId': cart.id, 'productId': item.getProduct.id }) }}" class="btn btn-danger">Remove from cart</a>
+                                <a href="{{ path('cart_update', {'orderId': cart.id, 'productId': item.getProduct.id, 'quantity': item.getQuantity + 1}) }}" class="btn btn-success">+</a>
+                                <a href="{{ path('cart_update', {'orderId': cart.id, 'productId': item.getProduct.id, 'quantity': item.getQuantity - 1}) }}" class="btn btn-warning">-</a>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+                <div class="col-md-4">
+                    <h3>Summary</h3>
+                    <p>Total: {{ cart.getSum }}</p>
+                    <a href="{{ path('cart_clear') }}" class="btn btn-danger">Clear Cart</a>
+                    <a href="{{ path('cart_checkout') }}" class="btn btn-primary">Checkout</a>
+                </div>
+            </div>
+        {% else %}
+            <div class="alert alert-info">
+                Your cart is empty. Go to the <a href="{{ path('app_shop') }}">product list</a>.
+            </div>
+        {% endif %}
+    </div>
+{% endblock %}

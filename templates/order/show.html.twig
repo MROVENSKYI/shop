@@ -1,0 +1,25 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Order Details{% endblock %}
+
+{% block body %}
+    <div class="container mt-4">
+        <h1>Order Details</h1>
+
+        <div class="row mt-4">
+            <div class="col-md-8">
+                {% for orderProduct in order.orderProducts %}
+                    <div class="mb-3">
+                        <h2>{{ orderProduct.product.name }}</h2>
+                        <p>Price: {{ orderProduct.price }} x {{ orderProduct.quantity }}</p>
+                        <p>Quantity: {{ orderProduct.quantity }}</p>
+                    </div>
+                {% endfor %}
+            </div>
+            <div class="col-md-4">
+                <h3>Summary</h3>
+                <p>Total: {{ order.sum }}</p>
+            </div>
+        </div>
+    </div>
+{% endblock %}
