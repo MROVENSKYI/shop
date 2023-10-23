@@ -11,9 +11,9 @@ class AppFixtures extends Fixture
     public function load(ObjectManager $manager): void
     {
         $products = [
-            ['name' => 'Kettle', 'price' => 300],
-            ['name' => 'Refrigerator', 'price' => 15000],
-            ['name' => 'TV', 'price' => 10000],
+            ['name' => 'Kettle', 'price' => 500],
+            ['name' => 'Refrigerator', 'price' => 20000],
+            ['name' => 'TV', 'price' => 12000],
         ];
 
         foreach ($products as $p) {

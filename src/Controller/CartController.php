@@ -57,7 +57,7 @@ class CartController extends AbstractController
         }
 
         $cart = $this->cartService->getCurrentCart($user);
-        $cartItems = $cart->getOrderProducts();
+        $cartItems = $cart->getCartProducts();
 
         return $this->render('cart/shopCart.html.twig', [
             'cart' => $cart,
@@ -83,8 +83,8 @@ class CartController extends AbstractController
         return $this->redirectToRoute('app_cart');
     }
 
-    #[Route('/shop/cart/remove/{orderId}/{productId}', name: 'cart_remove')]
-    public function removeFromCart(int $orderId, int $productId): Response
+    #[Route('/shop/cart/remove/{cartId}/{productId}', name: 'cart_remove')]
+    public function removeFromCart(int $cartId, int $productId): Response
     {
         /** @var User $user */
         $user = $this->getUser();
@@ -94,15 +94,15 @@ class CartController extends AbstractController
         }
 
         $cart = $this->cartService->getCurrentCart($user);
-        $orderProduct = $this->cartService->getOrderProduct($orderId, $productId);
+        $orderProduct = $this->cartService->getCartProduct($cartId, $productId);
 
         $this->cartService->removeFromCart($cart, $orderProduct);
 
         return $this->redirectToRoute('app_cart');
     }
 
-    #[Route('/shop/cart/update/{orderId}/{productId}/{quantity}', name: 'cart_update')]
-    public function updateQuantity(int $orderId, int $productId, int $quantity): Response
+    #[Route('/shop/cart/update/{cartId}/{productId}/{quantity}', name: 'cart_update')]
+    public function updateQuantity(int $cartId, int $productId, int $quantity): Response
     {
         /** @var User $user */
         $user = $this->getUser();
@@ -112,9 +112,9 @@ class CartController extends AbstractController
         }
 
         $cart = $this->cartService->getCurrentCart($user);
-        $orderProduct = $this->cartService->getOrderProduct($orderId, $productId);
+        $cartProduct = $this->cartService->getCartProduct($cartId, $productId);
 
-        $this->cartService->updateQuantity($cart, $orderProduct, $quantity);
+        $this->cartService->updateQuantity($cart, $cartProduct, $quantity);
 
         return $this->redirectToRoute('app_cart');
     }

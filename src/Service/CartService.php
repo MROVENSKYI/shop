@@ -2,10 +2,12 @@
 
 namespace App\Service;
 
-use App\Entity\Product;
-use App\Entity\User;
+use App\Entity\Cart;
+use App\Entity\CartProducts;
 use App\Entity\Order;
 use App\Entity\OrderProducts;
+use App\Entity\Product;
+use App\Entity\User;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 
@@ -18,17 +20,17 @@ class CartService
         $this->entityManager = $entityManager;
     }
 
-    public function getOrderProduct(int $orderId, int $productId): OrderProducts
+    public function getCartProduct(int $cartId, int $productId): CartProducts
     {
-        return $this->entityManager->getRepository(OrderProducts::class)->findOneBy([
-            'order' => $orderId,
+        return $this->entityManager->getRepository(CartProducts::class)->findOneBy([
+            'cart' => $cartId,
             'product' => $productId,
         ]);
     }
 
-    public function getCurrentCart(User $user): Order
+    public function getCurrentCart(User $user): Cart
     {
-        $cart = $this->entityManager->getRepository(Order::class)->findOneBy([
+        $cart = $this->entityManager->getRepository(Cart::class)->findOneBy([
             'user' => $user,
         ]);
 
@@ -39,9 +41,9 @@ class CartService
         return $cart;
     }
 
-    public function createCart(User $user): Order
+    public function createCart(User $user): Cart
     {
-        $cart = new Order();
+        $cart = new Cart();
         $cart->setUser($user);
         $cart->setSum(0);
 
@@ -51,15 +53,14 @@ class CartService
         return $cart;
     }
 
-    public function addToCart(Order $cart, Product $product, int $quantity = 1): void
+    public function addToCart(Cart $cart, Product $product, int $quantity = 1): void
     {
-        $orderProduct = new OrderProducts();
-        $orderProduct->setProduct($product);
-        $orderProduct->setOrder($cart);
-        $orderProduct->setQuantity($quantity);
-        $orderProduct->setPrice($product->getPrice());
+        $cartProduct = new CartProducts();
+        $cartProduct->setProduct($product);
+        $cartProduct->setQuantity($quantity);
+        $cartProduct->setPrice($product->getPrice());
 
-        $cart->addOrderProduct($orderProduct);
+        $cart->addCartProduct($cartProduct);
 
         $total = $this->calculateTotal($cart);
         $cart->setSum($total);
@@ -67,69 +68,79 @@ class CartService
         $this->entityManager->flush();
     }
 
-    public function removeFromCart(Order $cart, OrderProducts $orderProduct): void
+    public function removeFromCart(Cart $cart, CartProducts $cartProduct): void
     {
-        $cart->removeOrderProduct($orderProduct);
-        $cart->setSum($cart->getSum() - ($orderProduct->getPrice() * $orderProduct->getQuantity()));
+        $cart->removeCartProduct($cartProduct);
+        $cart->setSum($cart->getSum() - ($cartProduct->getPrice() * $cartProduct->getQuantity()));
 
-        $this->entityManager->remove($orderProduct);
+        $this->entityManager->remove($cartProduct);
         $this->entityManager->flush();
     }
 
-    public function updateQuantity(Order $cart, OrderProducts $orderProduct, int $newQuantity): void
+    public function updateQuantity(Cart $cart, CartProducts $cartProduct, int $newQuantity): void
     {
-        $cart->setSum($cart->getSum() - ($orderProduct->getPrice() * $orderProduct->getQuantity()));
-        $orderProduct->setQuantity($newQuantity);
-        $cart->setSum($cart->getSum() + ($orderProduct->getPrice() * $newQuantity));
+        $cart->setSum($cart->getSum() - ($cartProduct->getPrice() * $cartProduct->getQuantity()));
+        $cartProduct->setQuantity($newQuantity);
+        $cart->setSum($cart->getSum() + ($cartProduct->getPrice() * $newQuantity));
 
-        $this->entityManager->persist($orderProduct);
+        $this->entityManager->persist($cartProduct);
         $this->entityManager->flush();
     }
 
-    public function calculateTotal(Order $cart): float
+    public function calculateTotal(Cart $cart): float
     {
         $total = 0;
-        foreach ($cart->getOrderProducts() as $orderProduct) {
-            $total += ($orderProduct->getPrice() * $orderProduct->getQuantity());
+        foreach ($cart->getCartProducts() as $cartProduct) {
+            $total += ($cartProduct->getPrice() * $cartProduct->getQuantity());
         }
 
         return $total;
     }
 
-    public function clearCart(Order $cart): void
+    public function clearCart(Cart $cart): void
     {
-        foreach ($cart->getOrderProducts() as $orderProduct) {
-            $this->entityManager->remove($orderProduct);
+        foreach ($cart->getCartProducts() as $cartProduct) {
+            $this->entityManager->remove($cartProduct);
         }
 
         $cart->setSum(0);
-        $cart->clearOrderProducts();
+        $cart->clearCartProducts();
 
         $this->entityManager->flush();
     }
-    public function createOrder(Order $cart): Order
-    {
 
+    public function createOrder(Cart $cart): Order
+    {
         $order = new Order();
         $order->setUser($cart->getUser());
-        foreach ($cart->getOrderProducts() as $orderProduct) {
+
+        foreach ($cart->getCartProducts() as $cartProduct) {
+            $orderProduct = new OrderProducts();
+            $orderProduct->setProduct($cartProduct->getProduct());
+            $orderProduct->setQuantity($cartProduct->getQuantity());
+            $orderProduct->setPrice($cartProduct->getPrice());
+
             $order->addOrderProduct($orderProduct);
-            $orderProduct->setOrder($order);
+
+            $this->entityManager->persist($orderProduct);
         }
+
+        $order->setSum($cart->getSum());
 
         $this->entityManager->persist($order);
         $this->entityManager->flush();
 
         return $order;
     }
+
     /**
      * @throws Exception
      */
-    public function checkoutOrder($user): Order
+    public function checkoutOrder(User $user): Order
     {
         $cart = $this->getCurrentCart($user);
 
-        if ($cart->getOrderProducts()->isEmpty()) {
+        if ($cart->getCartProducts()->isEmpty()) {
             throw new Exception('Your cart is empty.');
         }
 

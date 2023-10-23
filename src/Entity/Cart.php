@@ -2,14 +2,13 @@
 
 namespace App\Entity;
 
-use App\Repository\OrderRepository;
+use App\Repository\CartRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\Common\Collections\Collection;
 
-#[ORM\Entity(repositoryClass: OrderRepository::class)]
-#[ORM\Table(name: '`order`')]
-class Order
+#[ORM\Entity(repositoryClass: CartRepository::class)]
+class Cart
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -20,15 +19,15 @@ class Order
     #[ORM\JoinColumn(nullable: false)]
     private ?User $user;
 
+    #[ORM\OneToMany(mappedBy: 'cart', targetEntity: CartProducts::class, cascade: ['persist'])]
+    private Collection $cartProducts;
+
     #[ORM\Column]
     private ?float $sum;
 
-    #[ORM\OneToMany(mappedBy: 'order', targetEntity: OrderProducts::class, cascade: ['persist'])]
-    private Collection $orderProducts;
-
     public function __construct()
     {
-        $this->orderProducts = new ArrayCollection();
+        $this->cartProducts = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -55,40 +54,41 @@ class Order
         return $this;
     }
 
-    public function getOrderProducts(): Collection|ArrayCollection
+    public function getCartProducts(): Collection|ArrayCollection
     {
-        return $this->orderProducts;
+        return $this->cartProducts;
     }
 
-    public function addOrderProduct(OrderProducts $orderProduct): self
+    public function addCartProduct(CartProducts $cartProduct): self
     {
-        if (!$this->orderProducts->contains($orderProduct)) {
-            $this->orderProducts[] = $orderProduct;
-            $orderProduct->setOrder($this);
+        if (!$this->cartProducts->contains($cartProduct)) {
+            $this->cartProducts[] = $cartProduct;
+            $cartProduct->setCart($this);
         }
 
         return $this;
     }
 
-    public function removeOrderProduct(OrderProducts $orderProduct): self
+    public function removeCartProduct(CartProducts $cartProduct): self
     {
-        if ($this->orderProducts->removeElement($orderProduct)) {
-            if ($orderProduct->getOrder() === $this) {
-                $orderProduct->setOrder( null);
+        if ($this->cartProducts->removeElement($cartProduct)) {
+            if ($cartProduct->getCart() === $this) {
+                $cartProduct->setCart(null);
             }
         }
 
         return $this;
     }
 
-    public function clearOrderProducts(): self
+    public function clearCartProducts(): self
     {
-        foreach ($this->orderProducts as $orderProduct) {
-            $this->removeOrderProduct($orderProduct);
+        foreach ($this->cartProducts as $cartProduct) {
+            $this->removeCartProduct($cartProduct);
         }
 
         return $this;
     }
+
     public function getSum(): ?float
     {
         return $this->sum;

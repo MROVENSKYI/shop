@@ -14,9 +14,12 @@
                             <p>Price: {{ item.getPrice }} x {{ item.getQuantity }}</p>
                             <p>Subtotal: {{ item.getPrice * item.getQuantity }}</p>
                             <div>
-                                <a href="{{ path('cart_remove', {'orderId': cart.id, 'productId': item.getProduct.id }) }}" class="btn btn-danger">Remove from cart</a>
-                                <a href="{{ path('cart_update', {'orderId': cart.id, 'productId': item.getProduct.id, 'quantity': item.getQuantity + 1}) }}" class="btn btn-success">+</a>
-                                <a href="{{ path('cart_update', {'orderId': cart.id, 'productId': item.getProduct.id, 'quantity': item.getQuantity - 1}) }}" class="btn btn-warning">-</a>
+                                <a href="{{ path('cart_remove', {'cartId': cart.id, 'productId': item.getProduct.id })
+                                }}" class="btn btn-danger">Remove from cart</a>
+                                <a href="{{ path('cart_update', {'cartId': cart.id, 'productId': item.getProduct.id,
+                                    'quantity': item.getQuantity + 1}) }}" class="btn btn-success">+</a>
+                                <a href="{{ path('cart_update', {'cartId': cart.id, 'productId': item.getProduct.id,
+                                    'quantity': item.getQuantity - 1}) }}" class="btn btn-warning">-</a>
                             </div>
                         </div>
                     {% endfor %}
