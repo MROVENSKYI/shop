@@ -2,8 +2,8 @@ Introduction
 
 1.Requirements:
 -Docker installed on your system.
--installed PHP, Symfony
--A PHP project with a suitable Dockerfile.
+-Installed Composer
+-A Symfony project with a suitable Dockerfile.
 
 2.Clone the repository:
 
@@ -15,17 +15,13 @@ Introduction
 
 4.Then, run:
 
-      docker-compose build && docker-compose up -d
+      composer install
 
 5.Then, run:
 
-      composer install
+      docker-compose build && docker-compose up -d
 
-6.Then, run:
+6.Then, go to:
 
-       symfony server:start -d
-
-               or
-
-       php -S 127.0.0.1:8000 -t public
+      http://localhost/
 

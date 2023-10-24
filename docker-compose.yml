@@ -16,6 +16,7 @@ services:
       dockerfile: Dockerfile
     volumes:
       - .:/var/www
+      - vendor:/var/www/vendor
 
   nginx:
     build:
@@ -27,3 +28,7 @@ services:
       - php-fpm
     volumes:
       - .:/var/www
+      - vendor:/var/www/vendor
+
+volumes:
+  vendor:
