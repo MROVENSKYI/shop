@@ -21,7 +21,5 @@ Introduction
 
       docker-compose build && docker-compose up -d
 
-6.Then, go to:
-
-      http://localhost:80/
+6.Then, go to the docker nginx container and click "Open with browser" 
 
