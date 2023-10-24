@@ -8,11 +8,20 @@ services:
     ports:
       - "3306:3306"
 
-  web:
+  php-fpm:
     build:
       context: .
       dockerfile: Dockerfile
+    volumes:
+      - .:/var/www
+
+  nginx:
+    build:
+      context: .
+      dockerfile: Dockerfile-nginx
     ports:
       - "80:80"
     depends_on:
-      - database
+      - php-fpm
+    volumes:
+      - .:/var/www
