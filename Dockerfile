@@ -17,6 +17,4 @@ RUN composer install
 RUN curl -sS https://get.symfony.com/cli/installer | bash
 RUN mv /root/.symfony5/bin/symfony /usr/local/bin/symfony
 
-CMD ["symfony", "server:start", "-d"]
-
 EXPOSE 80
