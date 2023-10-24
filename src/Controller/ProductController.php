@@ -10,7 +10,7 @@ use Symfony\Component\Routing\Annotation\Route;
 
 class ProductController extends AbstractController
 {
-    #[Route('/shop', name: 'app_shop')]
+    #[Route('/', name: 'app_shop')]
     public function shop(ProductRepository $productRepository): Response
     {
         return $this->render('product/shopList.html.twig', [

@@ -11,7 +11,7 @@ use App\Entity\User;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 
-class CartService
+class ShopService
 {
     private EntityManagerInterface $entityManager;
 

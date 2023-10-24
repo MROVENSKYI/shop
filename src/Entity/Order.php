@@ -70,25 +70,6 @@ class Order
         return $this;
     }
 
-    public function removeOrderProduct(OrderProducts $orderProduct): self
-    {
-        if ($this->orderProducts->removeElement($orderProduct)) {
-            if ($orderProduct->getOrder() === $this) {
-                $orderProduct->setOrder( null);
-            }
-        }
-
-        return $this;
-    }
-
-    public function clearOrderProducts(): self
-    {
-        foreach ($this->orderProducts as $orderProduct) {
-            $this->removeOrderProduct($orderProduct);
-        }
-
-        return $this;
-    }
     public function getSum(): ?float
     {
         return $this->sum;
