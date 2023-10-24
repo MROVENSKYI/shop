@@ -23,5 +23,5 @@ Introduction
 
 6.Then, go to:
 
-      http://localhost/
+      http://localhost:80/
 
