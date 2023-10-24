@@ -19,6 +19,10 @@ Introduction
 
 5.Then, run:
 
+      composer install
+
+6.Then, run:
+
        symfony server:start -d
 
                or
