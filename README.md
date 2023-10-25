@@ -15,11 +15,7 @@ Introduction
 
 4.Then, run:
 
-      composer install
-
-5.Then, run:
-
       docker-compose build && docker-compose up -d
 
-6.Then, go to the docker nginx container and click "Open with browser" 
+5.Then, go to the Docker Desktop, find nginx container and click "Open with browser" 
 
