@@ -2,7 +2,6 @@ Introduction
 
 1.Requirements:
 -Docker installed on your system.
--Installed Composer
 -A Symfony project with a suitable Dockerfile.
 
 2.Clone the repository:
