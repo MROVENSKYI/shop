@@ -4,14 +4,12 @@ namespace App\Service;
 
 use App\Entity\Cart;
 use App\Entity\CartProducts;
-use App\Entity\Order;
-use App\Entity\OrderProducts;
 use App\Entity\Product;
 use App\Entity\User;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 
-class ShopService
+class CartService
 {
     private EntityManagerInterface $entityManager;
 
@@ -22,22 +20,15 @@ class ShopService
 
     public function getCartProduct(int $cartId, int $productId): CartProducts
     {
-        return $this->entityManager->getRepository(CartProducts::class)->findOneBy([
-            'cart' => $cartId,
-            'product' => $productId,
-        ]);
+        return $this->entityManager->getRepository(CartProducts::class)->getCartProduct($cartId, $productId);
     }
 
     public function getCurrentCart(User $user): Cart
     {
-        $cart = $this->entityManager->getRepository(Cart::class)->findOneBy([
-            'user' => $user,
-        ]);
-
+        $cart = $this->entityManager->getRepository(Cart::class)->getCurrentCart($user);
         if ($cart === null) {
             $cart = $this->createCart($user);
         }
-
         return $cart;
     }
 
@@ -68,8 +59,9 @@ class ShopService
         $this->entityManager->flush();
     }
 
-    public function removeFromCart(Cart $cart, CartProducts $cartProduct): void
+    public function removeFromCart(CartProducts $cartProduct): void
     {
+        $cart= $cartProduct->getCart();
         $cart->removeCartProduct($cartProduct);
         $cart->setSum($cart->getSum() - ($cartProduct->getPrice() * $cartProduct->getQuantity()));
 
@@ -77,8 +69,9 @@ class ShopService
         $this->entityManager->flush();
     }
 
-    public function updateQuantity(Cart $cart, CartProducts $cartProduct, int $newQuantity): void
+    public function updateQuantity(CartProducts $cartProduct, int $newQuantity): void
     {
+        $cart= $cartProduct->getCart();
         $cart->setSum($cart->getSum() - ($cartProduct->getPrice() * $cartProduct->getQuantity()));
         $cartProduct->setQuantity($newQuantity);
         $cart->setSum($cart->getSum() + ($cartProduct->getPrice() * $newQuantity));
@@ -107,46 +100,5 @@ class ShopService
         $cart->clearCartProducts();
 
         $this->entityManager->flush();
-    }
-
-    public function createOrder(Cart $cart): Order
-    {
-        $order = new Order();
-        $order->setUser($cart->getUser());
-
-        foreach ($cart->getCartProducts() as $cartProduct) {
-            $orderProduct = new OrderProducts();
-            $orderProduct->setProduct($cartProduct->getProduct());
-            $orderProduct->setQuantity($cartProduct->getQuantity());
-            $orderProduct->setPrice($cartProduct->getPrice());
-
-            $order->addOrderProduct($orderProduct);
-
-            $this->entityManager->persist($orderProduct);
-        }
-
-        $order->setSum($cart->getSum());
-
-        $this->entityManager->persist($order);
-        $this->entityManager->flush();
-
-        return $order;
-    }
-
-    /**
-     * @throws Exception
-     */
-    public function checkoutOrder(User $user): Order
-    {
-        $cart = $this->getCurrentCart($user);
-
-        if ($cart->getCartProducts()->isEmpty()) {
-            throw new Exception('Your cart is empty.');
-        }
-
-        $order = $this->createOrder($cart);
-        $this->clearCart($cart);
-
-        return $order;
     }
 }

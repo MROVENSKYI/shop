@@ -4,7 +4,8 @@ namespace App\Controller;
 
 use App\Entity\Product;
 use App\Entity\User;
-use App\Service\ShopService;
+use App\Service\CartService;
+use App\Service\OrderService;
 use Exception;
 use LogicException;
 use Symfony\Component\HttpFoundation\Request;
@@ -15,11 +16,14 @@ use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 
 class CartController extends AbstractController
 {
-    private ShopService $shopService;
+    private CartService $cartService;
 
-    public function __construct(ShopService $shopService)
+    private OrderService $orderService;
+
+    public function __construct(CartService $cartService, OrderService $orderService)
     {
-        $this->shopService = $shopService;
+        $this->cartService = $cartService;
+        $this->orderService = $orderService;
     }
 
     #[Route('/shop/cart/checkout', name: 'cart_checkout')]
@@ -36,7 +40,7 @@ class CartController extends AbstractController
         }
 
         try {
-            $this->shopService->checkoutOrder($user);
+            $this->orderService->checkoutOrder($user);
         } catch (Exception) {
             $this->addFlash('error', 'Your cart is empty.');
             return $this->redirectToRoute('app_cart');
@@ -56,7 +60,7 @@ class CartController extends AbstractController
             throw new AccessDeniedException('You must be logged in to view your cart.');
         }
 
-        $cart = $this->shopService->getCurrentCart($user);
+        $cart = $this->cartService->getCurrentCart($user);
         $cartItems = $cart->getCartProducts();
 
         return $this->render('cart/shopCart.html.twig', [
@@ -66,7 +70,7 @@ class CartController extends AbstractController
     }
 
     #[Route('/shop/cart/add/{id}', name: 'cart_add')]
-    public function addToCart(Request $request,Product $product): Response
+    public function addToCart(Request $request, Product $product): Response
     {
         /** @var User $user */
         $user = $this->getUser();
@@ -77,8 +81,8 @@ class CartController extends AbstractController
 
         $quantity = $request->request->get('quantity', 1);
 
-        $cart = $this->shopService->getCurrentCart($user);
-        $this->shopService->addToCart($cart, $product, $quantity);
+        $cart = $this->cartService->getCurrentCart($user);
+        $this->cartService->addToCart($cart, $product, $quantity);
 
         return $this->redirectToRoute('app_cart');
     }
@@ -86,17 +90,8 @@ class CartController extends AbstractController
     #[Route('/shop/cart/remove/{cartId}/{productId}', name: 'cart_remove')]
     public function removeFromCart(int $cartId, int $productId): Response
     {
-        /** @var User $user */
-        $user = $this->getUser();
-
-        if ($user === null) {
-            throw new AccessDeniedException('You must be logged in to remove products from your cart.');
-        }
-
-        $cart = $this->shopService->getCurrentCart($user);
-        $orderProduct = $this->shopService->getCartProduct($cartId, $productId);
-
-        $this->shopService->removeFromCart($cart, $orderProduct);
+        $orderProduct = $this->cartService->getCartProduct($cartId, $productId);
+        $this->cartService->removeFromCart($orderProduct);
 
         return $this->redirectToRoute('app_cart');
     }
@@ -104,17 +99,8 @@ class CartController extends AbstractController
     #[Route('/shop/cart/update/{cartId}/{productId}/{quantity}', name: 'cart_update')]
     public function updateQuantity(int $cartId, int $productId, int $quantity): Response
     {
-        /** @var User $user */
-        $user = $this->getUser();
-
-        if ($user === null) {
-            throw new AccessDeniedException('You must be logged in to update products in your cart.');
-        }
-
-        $cart = $this->shopService->getCurrentCart($user);
-        $cartProduct = $this->shopService->getCartProduct($cartId, $productId);
-
-        $this->shopService->updateQuantity($cart, $cartProduct, $quantity);
+        $cartProduct = $this->cartService->getCartProduct($cartId, $productId);
+        $this->cartService->updateQuantity($cartProduct, $quantity);
 
         return $this->redirectToRoute('app_cart');
     }
@@ -129,9 +115,8 @@ class CartController extends AbstractController
             throw new AccessDeniedException('You must be logged in to clear your cart.');
         }
 
-        $cart = $this->shopService->getCurrentCart($user);
-
-        $this->shopService->clearCart($cart);
+        $cart = $this->cartService->getCurrentCart($user);
+        $this->cartService->clearCart($cart);
 
         return $this->redirectToRoute('app_cart');
     }

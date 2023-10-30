@@ -20,6 +20,13 @@ class CartProductsRepository extends ServiceEntityRepository
     {
         parent::__construct($registry, CartProducts::class);
     }
+    public function getCartProduct(int $cartId, int $productId): CartProducts
+    {
+        return $this->findOneBy([
+            'cart' => $cartId,
+            'product' => $productId,
+        ]);
+    }
 
 //    /**
 //     * @return CartProducts[] Returns an array of CartProducts objects
